@@ -1,9 +1,12 @@
-package com.payment.ledger;
+package com.payment.ledger.repository;
 
-import java.util.UUID;
-
-import org.apache.catalina.User;
+import com.payment.ledger.entity.User;
+import com.payment.ledger.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public interface WalletRepository extends JpaRepository<Wallet,UUID>{
 	
