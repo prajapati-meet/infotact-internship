@@ -1,7 +1,8 @@
 package com.payment.ledger.entity;
 
 import jakarta.persistence.*;
-import org.jspecify.annotations.Nullable;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,25 +12,36 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-public class User  implements UserDetails {
+@Table(name = "users")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @NotBlank
+    @Column(nullable = false, length = 50)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @NotBlank
+    @Email
+    @Column(nullable = false, length = 100)
     private String email;
 
+    @NotBlank
     @Column(nullable = false)
     private String passwordHash;
 
-//    private Role role;
+    // When role-based authorization is implemented, add:
+// @Enumerated(EnumType.STRING)
+// @Column(nullable = false, length = 20)
+// private Role role;
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToOne(
@@ -40,33 +52,58 @@ public class User  implements UserDetails {
     private Wallet wallet;
 
     @PrePersist
-    public void prePersist() {
+    public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate() {
+    public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+//        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())
+//        );
+
+        return List.of(); // Return an empty list for now, as role management is not implemented
     }
 
     @Override
-    public @Nullable String getPassword() {
-        return  passwordHash;
+    public String getPassword() {
+        return passwordHash;
     }
 
+    @Override
     public String getUsername() {
         return username;
     }
 
-    //getter and setter
+    // Need to implement these methods when integrating Spring Security:
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    //getter and setter
 
     public UUID getId() {
         return id;
@@ -75,7 +112,6 @@ public class User  implements UserDetails {
     public void setId(UUID id) {
         this.id = id;
     }
-
 
     public void setUsername(String username) {
         this.username = username;
@@ -96,6 +132,14 @@ public class User  implements UserDetails {
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
+
+//    public Role getRole() {
+//        return role;
+//    }
+//
+//    public void setRole(Role role) {
+//        this.role = role;
+//    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
