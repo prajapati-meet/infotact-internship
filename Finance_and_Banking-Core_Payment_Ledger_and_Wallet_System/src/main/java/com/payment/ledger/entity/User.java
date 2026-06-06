@@ -1,9 +1,11 @@
 package com.payment.ledger.entity;
 
+import com.payment.ledger.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -21,7 +23,7 @@ public class User implements UserDetails {
     private UUID id;
 
     @NotBlank
-    @Column(nullable = false, length = 50)
+    @Column( nullable = false, length = 50)
     private String username;
 
     @NotBlank
@@ -30,18 +32,18 @@ public class User implements UserDetails {
     private String email;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(name = "passwordHash", nullable = false)
     private String passwordHash;
 
-    // When role-based authorization is implemented, add:
-// @Enumerated(EnumType.STRING)
-// @Column(nullable = false, length = 20)
-// private Role role;
 
-    @Column(nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
+
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updatedAt", nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToOne(
@@ -65,10 +67,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())
-//        );
-
-        return List.of(); // Return an empty list for now, as role management is not implemented
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())
+        );
     }
 
     @Override
@@ -133,13 +133,13 @@ public class User implements UserDetails {
         this.passwordHash = passwordHash;
     }
 
-//    public Role getRole() {
-//        return role;
-//    }
-//
-//    public void setRole(Role role) {
-//        this.role = role;
-//    }
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -165,3 +165,4 @@ public class User implements UserDetails {
         this.wallet = wallet;
     }
 }
+
